@@ -86,18 +86,22 @@ const Auth = () => {
   };
 
   // 🔐 Google OAuth Handler
-  const handleGoogleLogin = async () => {
-    try {
-      await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin, // Kembali ke home setelah login
-        },
-      });
-    } catch (error) {
-      console.error('Google login error:', error);
-    }
-  };
+const handleGoogleLogin = async () => {
+  try {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo:
+          import.meta.env.MODE === 'development'
+            ? 'http://localhost:5173'
+            : 'https://laporanwarung.vercel.app',
+      },
+    });
+  } catch (error) {
+    console.error('Google login error:', error);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
