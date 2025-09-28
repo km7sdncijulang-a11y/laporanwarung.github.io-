@@ -91,10 +91,7 @@ const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo:
-          import.meta.env.MODE === 'development'
-            ? 'https://laporanwarung.vercel.app'
-            : 'http://localhost:5173',
+        redirectTo: 'https://laporanwarung.vercel.app',
       },
     });
   } catch (error) {
