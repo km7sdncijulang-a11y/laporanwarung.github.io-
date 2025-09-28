@@ -93,8 +93,8 @@ const handleGoogleLogin = async () => {
       options: {
         redirectTo:
           import.meta.env.MODE === 'development'
-            ? 'http://localhost:5173'
-            : 'https://laporanwarung.vercel.app',
+            ? 'https://laporanwarung.vercel.app'
+            : 'http://localhost:5173',
       },
     });
   } catch (error) {
