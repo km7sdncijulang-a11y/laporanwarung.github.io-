@@ -8,6 +8,7 @@ import { LogIn, UserPlus, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
 
 const loginSchema = z.object({
   email: z.string().email('Email tidak valid').min(1, 'Email wajib diisi'),
@@ -30,7 +31,6 @@ const Auth = () => {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -46,17 +46,12 @@ const Auth = () => {
       setIsLoading(true);
       
       const { error } = await signIn(validatedData.email, validatedData.password);
-      
-      if (!error) {
-        navigate('/');
-      }
+      if (!error) navigate('/');
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors: any = {};
         error.errors.forEach((err) => {
-          if (err.path) {
-            errors[err.path[0]] = err.message;
-          }
+          if (err.path) errors[err.path[0]] = err.message;
         });
         setLoginErrors(errors);
       }
@@ -74,23 +69,33 @@ const Auth = () => {
       setIsLoading(true);
       
       const { error } = await signUp(validatedData.email, validatedData.password, validatedData.displayName);
-      
       if (!error) {
-        // Reset form on success
         setSignupData({ email: '', password: '', displayName: '' });
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors: any = {};
         error.errors.forEach((err) => {
-          if (err.path) {
-            errors[err.path[0]] = err.message;
-          }
+          if (err.path) errors[err.path[0]] = err.message;
         });
         setSignupErrors(errors);
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // 🔐 Google OAuth Handler
+  const handleGoogleLogin = async () => {
+    try {
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin, // Kembali ke home setelah login
+        },
+      });
+    } catch (error) {
+      console.error('Google login error:', error);
     }
   };
 
@@ -163,6 +168,24 @@ const Auth = () => {
                     {isLoading ? 'Memproses...' : 'Login'}
                   </Button>
                 </form>
+
+                {/* 🔽 Divider */}
+                <div className="my-4 text-center text-muted-foreground">atau</div>
+
+                {/* 🔐 Login with Google */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2"
+                  onClick={handleGoogleLogin}
+                >
+                  <img
+                    src="https://www.svgrepo.com/show/475656/google-color.svg"
+                    alt="Google"
+                    className="w-4 h-4"
+                  />
+                  Masuk dengan Google
+                </Button>
               </TabsContent>
               
               <TabsContent value="signup">
